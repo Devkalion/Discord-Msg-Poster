@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 
 import discord
 
@@ -51,6 +52,16 @@ async def on_ready():
             print('Invalid command')
             print('Valid commands are:', ', '.join(valid_commands))
         elif command == 'exit':
+            messages = list(get_message_files())
+            if not len(messages):
+                break
+            if input('Save data? (N) ') in ('Y', 'y', 'yes', 'Yes'):
+                dirname = input(f'Enter dirname ({settings.DEFAULT_DIR_NAME}): ') or settings.DEFAULT_DIR_NAME
+                os.makedirs(f'../data/{dirname}', exist_ok=True)
+                for message in messages:
+                    shutil.copy2(f'../data/{message}', f'../data/{dirname}/{message}')
+            for message in messages:
+                os.remove(f'../data/{message}')
             break
         else:
             await post(command == 'test')
