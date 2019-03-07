@@ -28,15 +28,10 @@ async def post(test=True):
     for message_file in get_message_files():
         message_config = get_message_config(message_file)
         if test:
-            destination = os.environ['TEST_DESTINATION']
+            message_config['channel_id'] = os.environ['TEST_DESTINATION']
         else:
-            destination = message_config.get('destination', os.environ['DEFAULT_DESTINATION'])
-        message_config['destination'] = client.get_channel(destination)
-        if 'embed' in message_config:
-            embed_config = message_config['embed']
-            embed_config['timestamp'] = discord.Embed.Empty  # Not supported yet
-            message_config['embed'] = discord.Embed.from_data(embed_config).set_footer(**embed_config['footer'])
-        await client.send_message(**message_config)
+            message_config['channel_id'] = message_config.get('channel_id', os.environ['DEFAULT_DESTINATION'])
+        await client.http.send_message(**message_config)
     print('Messages posted successfully')
 
 
