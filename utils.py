@@ -13,7 +13,7 @@ def output(text, _exit=False):
 
 def get_message_files():
     files = sorted(os.listdir('data'))
-    return filter(lambda x: not x.endswith('.gitignore') and not x.endswith('.example'), files)
+    return filter(lambda x: os.path.isfile(x) and not x.endswith('.gitignore') and not x.endswith('.example'), files)
 
 
 def get_message_config(path):
