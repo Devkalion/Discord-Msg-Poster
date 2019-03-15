@@ -1,27 +1,11 @@
-import json
 import os
-import shutil
 
 import discord
 import dotenv
 
+from utils import output, save_data, get_message_config, get_message_files
+
 client = discord.Client()
-
-
-def get_message_files():
-    files = sorted(os.listdir('data'))
-    return filter(lambda x: not x.endswith('.gitignore') and not x.endswith('.example'), files)
-
-
-def get_message_config(path):
-    with open(f'data/{path}', encoding='utf8') as f:
-        return json.load(f)
-
-
-def make_message(message_config):
-    content = message_config['content']
-    embed = discord.Embed(**message_config['embed'])
-    return content, embed
 
 
 async def post_message(message_file, test):
@@ -52,27 +36,13 @@ async def post(test=True):
     print('Messages posted successfully')
 
 
-def save_data():
-    messages = list(get_message_files())
-    if not len(messages):
-        return
-    if input('Save data? (N) ') in ('Y', 'y', 'yes', 'Yes'):
-        dirname = os.environ.get('DEFAULT_DIR_NAME', 'dir')
-        dirname = input(f'Enter dirname ({dirname}): ') or dirname
-        os.makedirs(f'data/{dirname}', exist_ok=True)
-        for message in messages:
-            shutil.copy2(f'data/{message}', f'data/{dirname}/{message}')
-    for message in messages:
-        os.remove(f'data/{message}')
-
-
 @client.event
 async def on_ready():
     valid_commands = ('post', 'test', 'exit')
     print('Bot connected', 'Enter your commands', sep='\n')
     while True:
         dotenv.load_dotenv()
-        command = input('> ')
+        command = input('> ').lower()
 
         if command not in valid_commands:
             print('Invalid command')
@@ -87,6 +57,9 @@ async def on_ready():
 
 if __name__ == '__main__':
     dotenv.load_dotenv()
+    if 'TOKEN' not in os.environ:
+        output('Please specify bot token', True)
+
     TOKEN = os.environ['TOKEN']
     print('Waiting while bot connecting')
     client.run(TOKEN)
